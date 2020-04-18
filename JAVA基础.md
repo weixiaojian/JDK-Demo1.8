@@ -217,17 +217,3 @@ IndexOutOfBoundsException 数组下标越界异常NegativeArraySizeException 为
 ## 两种动态代理
 * JDK动态代理：利用反射机制生成一个实现代理接口的匿名类，在调用具体方法前调用InvokeHandler来处理.
 * CGlib动态代理：利用ASM（开源的Java字节码编辑库，操作字节码）开源包，将代理对象类的class文件加载进来，通过修改其字节码生成子类来处理。
-
-
-# Reids/RabbitMQ
-Redis、RabbitMQ加分项：举个项目例子
-
-1.不要用qq邮箱
-2.住址不要湖南湘潭
-3.对自己写的技术特长非常了解
-4.技术栈太浅
-5.前端三大框架vue、redict、Angela，三选二
-6.表现自己学习能力强
-7.描述在项目中的重点
-8.耐心 耐心 耐心
-9.加深对spring的理解、设计模式
