@@ -1,7 +1,5 @@
 package io.imwj.concurrent.enums;
 
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 枚举类其实就是数据版的mysql数据库

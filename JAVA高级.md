@@ -422,6 +422,52 @@ public class three {
 }
 ```
 
+### Callable（第三种实现多线程方式）
+* 区别：相对与Runnable有返回值、能够抛出异常
+* 启动方式：通过FutureTask
+* 注意：尽量最后get()获取返回值（如果计算返回值需要时间 main线程会阻塞等待 直到计算完成）
+* 
+```
+class mythread implements Callable<Integer>{
+    @Override
+    public Integer call() throws Exception {
+        System.out.println(Thread.currentThread().getName() + "\t 开启一个单独的线程");
+        TimeUnit.SECONDS.sleep(3);
+        return 1024;
+    }
+}
+
+public class CallableDemo {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        FutureTask<Integer> futureTask = new FutureTask<>(new mythread());//1.构造线程
+        new Thread(futureTask, "IG").start();//2.启动线程
+        Integer value = futureTask.get();//3.获取返回值（尽量往后放）
+        System.out.println("Callable实现多线程的返回值：" + value);
+    }
+}
+```
+
+## 线程池
+* 主要用来控制运行的线程的数量，处理过程中将线程放入队列，如果线程数量超出了队列数量 则需要排队等候等其他线程执行完毕再取出线程来执行
+* 优点：线程复用；控制最大并发数；管理线程（底层是阻塞队列）
+
+### ThreadPoolExecutor（第四种实现多线程）
+* Executors.newCachedThreadPool() 
+创建一个根据需要创建新线程的线程池，但在可用时将重新使用以前构造的线程。
+* Executors.newFixedThreadPool(int nThreads)
+创建一个线程池，该线程池重用固定数量的从共享无界队列中运行的线程。 
+* Executors.newFixedThreadPool()
+创建一个使用从无界队列运行的单个工作线程的执行程序
+* 开启/停止命令
+```
+executorService.execute();
+executorService.shutdown();
+```
+
+### 线程池七大参数
+
+
+
 ### Synchronized和Lock的区别
 * Sync是关键字属于JVM层面，Lock是具体类属于Api层面
 * Sync不需要手动释放锁，Lock需要手动释放锁 否则产生死锁
