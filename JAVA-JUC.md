@@ -1,65 +1,4 @@
-## GC
-### 分代
-> * Java虚拟机根据对象存活的周期不同，把堆内存划分为几块，一般分为新生代、老年代和永久代（对HotSpot虚拟机而言），这就是JVM的内存分代策略。
-> * 堆内存是虚拟机管理的内存中最大的一块，也是垃圾回收最频繁的一块区域，我们程序所有的对象实例都存放在堆内存中
-> * 新生代中的对象存活时间短，只需要在新生代区域中频繁进行GC，老年代中对象生命周期长，内存回收的频率相对较低，不需要频繁进行回收，永久代中回收效果太差，一般不进行垃圾回收
-### 分代划分
-![image](https://blog.imwj.club//upload/2020/04/37nj67852ui6spb5q2806hm35a.png)
-
-#### 新生代（Young Generation） Minor GC
-* HotSpot将新生代划分为三块，一块较大的Eden（伊甸）空间和两块较小的Survivor（幸存者）空间，默认比例为8：1：1。 划分的目的是因为HotSpot采用复制算法来回收新生代，设置这个比例是为了充分利用内存空间，减少浪费。新生成的对象在Eden区分配（大对象除外，大对象直接进入老年代），当Eden区没有足够的空间进行分配时，虚拟机将发起一次Minor GC
-* 新生成的对象优先存放在新生代中，新生代对象朝生夕死，存活率很低，在新生代中，常规应用进行一次垃圾收集一般可以回收70% ~ 95% 的空间，回收效率很高。
-* GC开始时，对象只会存在于Eden区和From Survivor区，To Survivor区是空的（作为保留区域）
-* GC进行时，Eden区中所有存活的对象都会被复制到To Survivor区，而在From Survivor区中，仍存活的对象会根据它们的年龄值决定去向（默认为15）年龄值达到年龄阀值的对象会被移到老年代中，没有达到阀值的对象会被复制到To Survivor区。接着清空Eden区和From Survivor区，新生代中存活的对象都在To Survivor区。
-#### 老年代（Old Generationn） Full GC
-* 老年代中的对象生命周期较长，存活率比较高，在老年代中进行GC的频率相对而言较低，而且回收的速度也比较慢。
-* 对象的大小大于Eden的二分之一会直接分配在old
-#### 永久代（Permanent Generationn）
-* 永久代存储类信息、常量、静态变量、即时编译器编译后的代码等数据对这一区域而言，Java虚拟机规范指出可以不进行垃圾收集，一般而言不会进行垃圾回收
-* 1.8之后替换成了Metaspace（元空间 使用本地内存）
-### 分代垃圾收集器分类
-#### 次收集器Minor GC
-* 发生在新生代的垃圾回收
-* 当Eden空间不足以为对象分配内存时，会触发Scavenge GC，收集间隔较短
-#### 全收集器Full GC
-* 指发生在老年代的GC，出现了Full GC一般会伴随着至少一次的Minor GC，
-* 当老年代或者用久代堆空间满了才会触发，收集间隔较长
-* 可以使用System.gc()方法来显式的启动全收集
-### 分代垃圾收集器（七个）
-* 串行收集器（Serial）
-* 并行收集器（ParNew）
-* Parallel Scavenge收集器
-* Serial Old收集器
-* Parallel Old收集器
-* CMS收集器（Concurrent Mark Sweep）
-* 分区收集- G1收集器
-
-### 垃圾回收算法（四个）
-#### 引用计数（Reference Counting）
-* 此对象有一个引用，即增加一个计数，删除一个引用则减少一个计数。
-* 无法处理循环引用的问题
-#### 复制（Copying） 
-* 新生代Minor GC中使用
-* 垃圾回收时，遍历当前使用区域，把正在使用中的对象复制到另外一个区域中
-* 复制成本较小，但需要两倍内存空间
-#### 标记-清除（Mark-Sweep）
-* 老年代Full GC中使用
-* 此算法执行分两阶段。第一阶段从引用根节点开始标记所有被引用的对象，第二阶段遍历整个堆，把未标记的对象清除
-* 需要暂停应用，且会产生内存碎片
-#### 标记-整理（Mark-Compact）
-* 结合了“标记-清除”+“复制”
-* 第一阶段从根节点开始标记所有被引用对象，第二阶段遍历整个堆，把清除未标记对象并且把存活对象“压缩”到堆的其中一块，按顺序排放
-
-## JUC
-* java.util.concurrent （实现线程安全包）
-### JMM(java内存模型)
-* 所有变量都存储在主内存，主内存是共享内存区域,所有线程都可访问,但线程对变量的操作(读取赋值等)必须在工作内存中进行,首先要将变量从主内存拷贝到自己的工作空间,然后对变量进行操作,操作完成再将变量写回主内存
-* 可见性：线程操作变量 写回内存之后能够通知其他内存就是可见性
-* 原子性：同时成功或者同时失败，n个线程同时去操作一个内存中的变量 最后变量的值要正确
-* 有序性：编译器为了性能的优化，有时候会改变程序中语句的先后顺序，有序性指的是程序按照代码的先后顺序执行
-* ![image](https://blog.imwj.club//upload/2020/04/34g4udq8g6jqnp4bp5bkrkesib.png)
-
-
+## java.util.concurretn（高并发）
 ### Volatile
 * 保证可见性、不保证原子性、禁止指令重排（指令重排：编译为了优化代码执行进行的顺序重排）
 * 如何保证原子性：使用java.util.concurrent.atomic包下的AtomicInteger替换我们原本用的int等基本类型
@@ -450,23 +389,113 @@ public class CallableDemo {
 ## 线程池
 * 主要用来控制运行的线程的数量，处理过程中将线程放入队列，如果线程数量超出了队列数量 则需要排队等候等其他线程执行完毕再取出线程来执行
 * 优点：线程复用；控制最大并发数；管理线程（底层是阻塞队列）
+![image](https://blog.imwj.club//upload/2020/04/69f2ni6sv0j9dob4gsrs3q71f0.png)
 
 ### ThreadPoolExecutor（第四种实现多线程）
-* Executors.newCachedThreadPool() 
-创建一个根据需要创建新线程的线程池，但在可用时将重新使用以前构造的线程。
-* Executors.newFixedThreadPool(int nThreads)
-创建一个线程池，该线程池重用固定数量的从共享无界队列中运行的线程。 
-* Executors.newFixedThreadPool()
-创建一个使用从无界队列运行的单个工作线程的执行程序
-* 开启/停止命令
+* Executors.newCachedThreadPool()（底层队列SynchronousQueue）  
+创建一个根据需要创建新线程的线程池，但在可用时将重新使用以前构造的线程  
+* Executors.newFixedThreadPool(int nThreads)（底层队列LinkedBlockingQueue）  
+创建一个线程池，该线程池重用固定数量的从共享无界队列中运行的线程  
+* Executors.newSingleThreadExecutor()（底层队列LinkedBlockingQueue）  
+创建一个使用从无界队列运行的单个工作线程的执行程序  
+* 总结：以上三种方式正式开发中并不会使用（这三个允许请求的长度都是Integer.MAX_VALUE 可能会堆积大量请求导致OOM[内存用完]），一般都是要自己手写线程池(ThreadPoolExecutor)
+* 代码实现
 ```
-executorService.execute();
-executorService.shutdown();
+        //jdk提供方式(不用)：ExecutorService threadPool = Executors.newFixedThreadPool(5);
+        ExecutorService threadPool = new ThreadPoolExecutor(2,
+                                                            5,
+                                                            5,
+                                                            TimeUnit.SECONDS,
+                                                            new LinkedBlockingDeque<>(3),
+                                                            Executors.defaultThreadFactory(),
+                                                            new ThreadPoolExecutor.AbortPolicy());
+        try {
+            for (int i = 0; i < 10; i++) {//开启十个线程去访问
+                threadPool.execute(() -> {
+                    System.out.println(Thread.currentThread().getName() + "\t SUCCESS!");
+                });
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {//用完线程一定要关闭
+            threadPool.shutdown();
+        }
 ```
 
 ### 线程池七大参数
+```
+public ThreadPoolExecutor(int corePoolSize,//线程池钟常驻核心线程数
+                              int maximumPoolSize,//线程池能够容纳同时执行的最大线程数（大于1）
+                              long keepAliveTime,//多余线程存活时间
+                              TimeUnit unit,//时间单位
+                              BlockingQueue<Runnable> workQueue,//任务队列 被提交但尚未被执行的任务
+                              ThreadFactory threadFactory,//线程工厂 创建新的线程（默认即可）
+                              RejectedExecutionHandler handler)//拒绝策略，当线程队列满了且工作线程大于maximumPoolSize时如何拒绝
+```
+
+### 线程池底层工作原理
+1.在创建线程池后，等待提交过来的任务请求  
+2.当调用execute()方法添加一个任务请求时，线程池会马上创建线程运行这个任务  
+    2.1如果正在运行的线程数量小于corePoolSize，那么马上创建线程运行这个任务  
+    2.2如果正在运行的线程数量大于或等于corePoolSize，那么将这个任务`放入队列`  
+    2.3如果队列满了且正在运行的线程数量小于maximumPoolSize，那么会创建非核心线程运行这个任务  
+    2.4如果队列满了且正在运行的线程数量大于或等于maximumPoolSize，那么线程池会启动`饱和和拒绝策略`  
+3.当一个线程完成任务时，它会从队列中取下一个任务来执行  
+4.当一个线程闲置超过`keepAliveTime`的时间，线程池会判断  
+    4.1如果当前线程数大于corePoolSize，那么这个线程会被停掉  
+    4.2线程池的所有任务完成后它最终会收缩到corePoolSize的大小  
+    
+    
+### 线程池的四大拒绝策略
+* AbortPolicy(默认)：直接抛出RejectedException异常阻止系统正常运行
+* CallerRunPolicy：即不抛异常 也不丢弃任务，回退给调用者
+* DiscardoldestPolicy：抛弃队列中等待最久的任务
+* DiscardPolicy：直接丢弃任务
+
+### 线程池参数的合理配置
+* CPU密集型：CPU核数+1
+* IO密集型：CPU核数/(1-阻塞系数)，阻塞系数（0.8或0.9）
 
 
+## 死锁
+* 指的是两个或两个以上的线程在执行过程中，因争夺资源而造成一种**互相等待的现象**
+### 产生原因
+* 系统资源不足、进程推进的顺序不合适、资源分配不当
+```
+class Deadloc implements Runnable{
+    private String lockAa,lockBb;
+    public Deadloc(String lockAa, String lockBb){
+        this.lockAa = lockAa;
+        this.lockBb = lockBb;
+    }
+    @Override
+    public void run() {
+        synchronized (lockAa){
+            System.out.println(Thread.currentThread().getName() + "\t 拿到锁："+lockAa);
+            try {TimeUnit.SECONDS.sleep(1);} catch (InterruptedException e) { e.printStackTrace();}
+            synchronized (lockBb){
+                System.out.println(Thread.currentThread().getName() + "\t 拿到锁："+lockBb);
+            }
+        }
+    }
+}
+public class DeadlockDemo {
+    public static void main(String[] args) {
+        Deadloc deadloc = new Deadloc("lockAa", "lockBb");
+        Deadloc deadloc1 = new Deadloc("lockBb", "lockAa");
+        new Thread(deadloc, "ThreadAAA").start();
+        new Thread(deadloc1, "ThreadBBB").start();
+    }
+}
+```
+
+### 如何解决
+* jps命令定位进程编号，jstack找到死锁查看
+```
+jps -l
+
+jstack 进程编号
+```
 
 ### Synchronized和Lock的区别
 * Sync是关键字属于JVM层面，Lock是具体类属于Api层面
@@ -476,31 +505,5 @@ executorService.shutdown();
 * Lock有锁绑定多个条件Condition Sync没有（sync只能是唤醒所有或者唤醒一个 Lock可以精确唤醒）
 
 
-
-
 ### ThreadLocal的了解，实现原理。
 每个线程都保存一份threadlocalmap的引用,以ThreadLocal和 ThreadLocal对象声明的变量类型作为参数
-
-
-## JVM
-### 双亲委派模式
-```mermaid
-graph TD
-A[Bootstrap ClassLoader] -->B[Extension ClassLoader] 
-B --> C[App ClassLoader]
-C --> D[自定义类加载器]
-C --> E[自定义类加载器]
-```
-*  某个特定的类加载器在接到加载类的请求时，首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。
-* 避免重复加载 + 避免核心类篡改
-
-#### JVM内存结构
-* 堆：存放所有new出来的对象（管运行）
-* 虚拟机栈：存放基本数据类型、局部变量、对象的引用（管储存）
-* 本地方法栈：
-* 程序计数器：
-* 方法区：
-![image](https://blog.imwj.club//upload/2020/04/7h1k1lov56gkcqmf95f3mln8p3.png)
-
-## 类的初始化
-* 父类静态代码块 > 子类静态代码块 > 父类普通变量及其语句块 > 父类构造方法 > 子类普通变量及其语句块 > 子类构造方法

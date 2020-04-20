@@ -1,30 +1,26 @@
-/**
- * volatile防止指令重排
- * synchronized：保证原子性
- */
-class Singleton{
-    public static volatile Singleton singleton = null;
-
-    public static Singleton getSingleton(){
-        //双端检锁机制
-        if(singleton == null){
-            synchronized (Singleton.class){
-                if(singleton == null){
-                    singleton = new Singleton();
-                }
-            }
-        }
-        return singleton;
-    }
-}
+import java.beans.beancontext.BeanContext;
+import java.util.Arrays;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class Main {
 
     public static void main(String[] args) {
-        for (int i = 0; i < 1000; i++) {
-            new Thread(() -> {
-                System.out.println(Singleton.getSingleton() == Singleton.getSingleton());
-            }, String.valueOf(i)).start();
+        Integer[] arr = new Integer[]{7,6,3,4,2};
+        for (int i = 0; i < arr.length-1; i++) {
+            boolean flag = true;
+            Integer temp;
+            for (int j = 0; j < arr.length - i - 1; j++) {
+                if(arr[j] > arr[j+1]){
+                    temp = arr[j];
+                    arr[j] = arr[j+1];
+                    arr[j+1] = temp;
+                    flag = false;
+                }
+            }
+            if(false)
+                break;
         }
+        Arrays.stream(arr)
+                .forEach(a -> System.out.println(a));
     }
 }
