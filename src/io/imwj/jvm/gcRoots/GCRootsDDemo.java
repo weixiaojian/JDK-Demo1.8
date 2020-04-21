@@ -1,4 +1,4 @@
-package io.imwj.jvm;
+package io.imwj.jvm.gcRoots;
 
 /**
  * GC Roots示例
