@@ -170,7 +170,7 @@ GC名称(Young)         【GC前Young内存占用->GC后Young内存占用(Young�
 ### 四大引用（强、软、弱、虚）
 * Reference是Object下的一个子类，java.lang.ref.Reference
 #### 强引用
-* 无论是GC还是OOM都不会清理掉强引用
+* 无论是GC还是OOM(内存用完了)都不会清理掉强引用
 ```
 Object obj = new Object();
 Object obj1 = obj; //两个都是强引用
@@ -179,10 +179,26 @@ obj = null; //这样会清理掉obj，并不会清理掉obj1
 
 #### 软引用SoftReference
 * 内存充足时保留，内存不够时进行回收
+```
+Object obj = new Object();
+SoftReference obj1 = new SoftReference(obj);
+obj = null; //这样会清理掉obj，但在内存不足的时候就会把obj1清理掉
+```
 
 #### 弱引用WeakReference 
 * 只要触发GC弱引用对象就会被回收掉
 * WeakHashMap
+```
+Object obj = new Object();
+WeakReference obj1 = new WeakReference(obj);
+
+obj = null;
+System.gc(); //gc之后obj1就等于null了
+```
 
 #### 虚引用PhantomReference 
-* 
+* 形同虚设，如果一个对象仅持有虚引用那么它就和没有任何引用一样在任何时候都可能被回收掉，不能单独使用需要配合`ReferenceQueue`使用
+
+### OOM(内存用完)
+#### StackOverflowError 栈溢出
+#### OutOfMemoryErro:Java heap sapce

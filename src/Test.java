@@ -1,3 +1,4 @@
+import java.sql.*;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -5,17 +6,28 @@ import java.util.stream.Stream;
  * @author langao_q
  * @create 2020-04-16 10:48
  */
+public class Test{
 
-class Preant{
+    public static volatile Test test = null;
 
-    void one(){
-
+    public static Test getTest(){
+        if(test == null){
+            synchronized(Test.class){
+                if(test == null){
+                     return new Test();
+                }
+            }
+        }
+        return test;
     }
-
-}
-
-public class Test extends Preant{
 
     public static void main(String[] args) {
+        System.out.println(getTest());
+        System.out.println(getTest());
+        System.out.println(getTest());
+        System.out.println(getTest());
+        System.out.println(getTest());
+        System.out.println(getTest());
     }
+
 }
