@@ -1,12 +1,11 @@
 ## JVM
 ### 双亲委派模式
-```mermaid
-graph TD
-A[Bootstrap ClassLoader] -->B[Extension ClassLoader] 
-B --> C[App ClassLoader]
-C --> D[自定义类加载器]
-C --> E[自定义类加载器]__
-```
+[Bootstrap ClassLoader]  
+[Extension ClassLoader]   
+[App ClassLoader]  
+[自定义类加载器]  
+[自定义类加载器]  
+
 *  某个特定的类加载器在接到加载类的请求时，首先将加载任务委托给父类加载器，依次递归，如果父类加载器可以完成类加载任务，就成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。
 * 避免重复加载 + 避免核心类篡改
 
@@ -50,13 +49,20 @@ C --> E[自定义类加载器]__
 * 当老年代或者用久代堆空间满了才会触发，收集间隔较长
 * 可以使用System.gc()方法来显式的启动全收集
 ### 分代垃圾收集器（七个）
-* 串行收集器（Serial）
-* 并行收集器（ParNew）
+* 串行收集器（Serial）  
+它为单线程环境设计 且只使用一个线程进行回收，回收时会暂停所有用户线程 不适合服务器环境
+* 并行收集器（ParNew默认）  
+多个线程并行工作，此时用户线程时暂停的 适用于大数据首页弱用户交流页面
 * Parallel Scavenge收集器
 * Serial Old收集器
 * Parallel Old收集器
-* CMS收集器（Concurrent Mark Sweep）
-* 分区收集- G1收集器
+* CMS收集器（并发收集器）  
+用户线程和垃圾收集线程同时执行，不需要停顿 常用它作为正式环境
+* 分区收集- G1收集器(新生代/老年代通用)  
+将堆内存分割成不同的区域然后并发的对其进行垃圾回收
+```
+-XX:+UseSerialGC
+```
 
 ### 垃圾回收算法（四个）
 #### 引用计数（Reference Counting）
@@ -76,7 +82,7 @@ C --> E[自定义类加载器]__
 
 ### GC Roots
 * Java垃圾回收中是通过一组名为“GC Roots”的对象作为起点，从该起点向下搜索（根链路扫描） 未能遍历到则说明该对象不可用
-* GC Roots：
+* GC Roots：  
 1.虚拟机栈中引用的对象
 2.方法区中的类静态属性引用对象
 3.方法区常量引用对象
@@ -200,5 +206,53 @@ System.gc(); //gc之后obj1就等于null了
 * 形同虚设，如果一个对象仅持有虚引用那么它就和没有任何引用一样在任何时候都可能被回收掉，不能单独使用需要配合`ReferenceQueue`使用
 
 ### OOM(内存用完)
-#### StackOverflowError 栈溢出
-#### OutOfMemoryErro:Java heap sapce
+#### StackOverflowError 
+* 栈溢出（方法递归调用）
+* 解决方案：查看系统是否有使用copy大百内存的代码或死循环；添加JVM配置，来限制使用内存
+```
+    public static void StackOverflowErro(){
+        StackOverflowErro();//递归调用
+    }
+```
+#### OutOfMemeoryError:Java heap sapce
+* Java内存堆用完
+* 解决方案：加大-Xms、-Xmx的空间
+```
+    public static void OOMJavaHeapSpace(){
+        byte[] bytes = new byte[20 * 1024 * 1024];
+    }
+```
+#### OutOfMemeoryError：GC overhead limit exceeded
+* GC回收时间过长，GC回收做了无用功
+```
+    public static void OOMGCoverHeadLimitExceeded(){
+        int i = 0;
+        List<String> list = new ArrayList<>();
+        try {
+            while (true){
+                list.add(String.valueOf(i++).intern());
+            }
+        }catch (Exception e){
+            System.out.println("*************i：" + i);
+            e.printStackTrace();
+        }
+    }
+```
+#### OutOfMemeoryError：Direct buffer memory
+* 直接内存溢出，常见于NIO程序（Netty）；JVM内存外的内存区域没有足够的空间了
+
+#### OutOfMemeoryError：unable to create new native thread
+* 线程创建数超出系统极限，linux默认一个进程的最大线程数是1024
+* 解决方案：将代码中线程数降到最低、如果确实需要超高线程数可以修改linux默认参数
+```
+        for (int i = 0; ; i++) {
+            System.out.println("************" + i);
+            new Thread(() -> {
+                try {TimeUnit.SECONDS.sleep(Integer.MAX_VALUE);} catch (Exception e) {e.printStackTrace();}
+            }, "" + i).start();
+        }
+```
+
+#### OutOfMemeoryError：Metaspace
+* 元空间内存溢出，元空间包含类信息、常量、静态变量、即时编译器编译后的代码等数据
+* 生成类的数量超出元空间大小
